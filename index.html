@@ -396,11 +396,18 @@
     });
 }
         function updateSoundVolume(soundName, value) {
-            value = value / 100;
-            soundVolumes[soundName] = value;
-            soundAudios[soundName].volume = value;
-            document.getElementById(soundName + 'Value').textContent = Math.round(value * 100) + '%';
-        }
+    value = value / 100;
+    soundVolumes[soundName] = value;
+    soundAudios[soundName].volume = value;
+    document.getElementById(soundName + 'Value').textContent = Math.round(value * 100) + '%';
+    
+    // Erzwinge Update auf Mobile
+    if (!soundAudios[soundName].paused) {
+        soundAudios[soundName].pause();
+        soundAudios[soundName].currentTime = 0;
+        soundAudios[soundName].play();
+    }
+}
         // ===== p5.js SKETCH =====
         let sketch = (p) => {
             let turtles = [];
