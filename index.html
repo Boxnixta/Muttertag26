@@ -299,319 +299,342 @@
         </div>
     </div>
     <script>
-        // ===== BRIEF-SYSTEM =====
-        function openLetter() {
-            document.getElementById('letterScreen').style.display = 'none';
-            document.getElementById('mainScreen').style.display = 'block';
-            startSketch();
-            startAudio();
-        }
-        // ===== MUSIK-PLAYER =====
-        let currentTrackIndex = 0;
-        let isPlaying = false;
-        let audioPlayer = new Audio();
-        const tracks = [
-            'musicplayer/0.mp3',
-            'musicplayer/1.mp3',
-            'musicplayer/2.mp3',
-            'musicplayer/3.mp3',
-            'musicplayer/4.mp3',
-            'musicplayer/5.mp3',
-            'musicplayer/6.mp3'
-        ];
-        function togglePlay() {
-            if (isPlaying) {
-                audioPlayer.pause();
-                document.getElementById('playButton').textContent = '▶️ Abspielen';
-            } else {
-                if (audioPlayer.src === '') {
-                    audioPlayer.src = tracks[currentTrackIndex];
-                }
-                audioPlayer.play().catch(e => console.log('Fehler beim Abspielen:', e));
-                document.getElementById('playButton').textContent = '⏸️ Pausieren';
-            }
-            isPlaying = !isPlaying;
-        }
-        function nextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-            audioPlayer.src = tracks[currentTrackIndex];
-            if (isPlaying) {
-                audioPlayer.play();
-            }
-        }
-        function previousTrack() {
-            currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
-            audioPlayer.src = tracks[currentTrackIndex];
-            if (isPlaying) {
-                audioPlayer.play();
-            }
-        }
-        // ===== NATURGERÄUSCHE =====
-        let soundVolumes = {
-            birds: 0.5,
-            grille: 0.5,
-            rain: 0.5,
-            wind: 0.5
-        };
-        let soundAudios = {
-            birds: new Audio(),
-            grille: new Audio(),
-            rain: new Audio(),
-            wind: new Audio()
-        };
-
-        let fadeInIntervals = {
-            grille: null,
-            rain: null,
-            wind: null
-        };
-        function startAudio() {
-    soundAudios.birds.src = 'music/bird.mp3';
-    soundAudios.grille.src = 'music/grille.mp3';
-    soundAudios.rain.src = 'music/rain.mp3';
-    soundAudios.wind.src = 'music/wind.mp3';
-
-    // VOGELGESANG: Mit 5 Sekunden Pause
-    soundAudios.birds.loop = false;
-    soundAudios.birds.volume = 0.2;
-    soundAudios.birds.play();
-    
-    soundAudios.birds.onended = function() {
-        setTimeout(() => {
-            soundAudios.birds.currentTime = 0;
-            soundAudios.birds.play();
-        }, 13000);
-    };
-
-    // ANDERE: Nahtlose Loop mit Fade-In
-    ['grille', 'rain', 'wind'].forEach(sound => {
-        soundAudios[sound].loop = true;
-        soundAudios[sound].volume = 0;
-        soundAudios[sound].play();
-        
-        // Sanfter Fade-In (2 Sekunden)
-        let vol = 0;
-        fadeInIntervals[sound] = setInterval(() => {
-            if (vol < 0.5) {
-                vol += 0.05;
-                soundAudios[sound].volume = vol;
-            } else {
-                clearInterval(fadeInInterval);
-                fadeInIntervals[sound] = null;
-            }
-        }, 100);
-    });
-}
-        function updateSoundVolume(soundName, value) {
-    value = value / 100;
-    soundVolumes[soundName] = value;
-    
-    // Fade-In Interval STOPPEN wenn Slider bewegt wird
-    if (fadeInIntervals[soundName]) {
-        clearInterval(fadeInIntervals[soundName]);
-        fadeInIntervals[soundName] = null;
+// ===== BRIEF-SYSTEM =====
+    function openLetter() {
+        document.getElementById('letterScreen').style.display = 'none';
+        document.getElementById('mainScreen').style.display = 'block';
+        startSketch();
+        startAudio();
     }
     
-    soundAudios[soundName].volume = value;
-    document.getElementById(soundName + 'Value').textContent = Math.round(value * 100) + '%';
-}
-        // ===== p5.js SKETCH =====
-        let sketch = (p) => {
-            let turtles = [];
-            let flowers = [];
-            let grasses = [];
-            let stars = [];
-            let dandelionPiles = [];
-            let teaCup = [];
-            let mushroomX, mushroomY;
-            // Bilder
-            let turtleImg;
-            let flowerImg;
-            let grassImg;
-            let mushroomImg;
-            let leavesImg;
-            let teaCupImg;
-            p.preload = function() {
-                turtleImg = p.loadImage('img/turtle.png');
-                flowerImg = p.loadImage('img/flower.png');
-                grassImg = p.loadImage('img/grass.png');
-                mushroomImg = p.loadImage('img/fliegenpilz.png');
-                leavesImg = p.loadImage('img/blaetter.png');
-                teaCupImg = p.loadImage('img/tee.png');
-            };
-            p.setup = function() {
-                const container = document.getElementById('p5-container');
-                const width = container.offsetWidth;
-                const height = Math.max(500, width * 0.6);
-                let canvas = p.createCanvas(width, height);
-                canvas.parent('p5-container');
-                // Sterne
-                for (let i = 0; i < 30; i++) {
-                    stars.push({
-                        x: p.random(width),
-                        y: p.random(height * 0.3),
-                        size: p.random(1, 3),
-                        opacity: p.random(100, 200)
-                    });
-                }
-                // Blumen
-                for (let i = 0; i < 8; i++) {
-                    flowers.push({
-                        x: p.random(50, width - 50),
-                        y: p.random(height * 0.5, height * 0.85),
-                        petalColor: p.color(p.random(200, 230), p.random(160, 200), p.random(140, 180), 200)
-                    });
-                }
-                // Gräser
-                for (let i = 0; i < 6; i++) {
-                    grasses.push({
-                        x: p.random(width),
-                        y: p.random(height * 0.6, height),
-                        height: p.random(80, 100)
-                    });
-                }
-                // Löwenzahn
-                for (let i = 0; i < 30; i++) {
-                    dandelionPiles.push({
-                        x: p.random(50, width - 50),
-                        y: p.random(height * 0.5, height * 0.85),
-                        eaten: false
-                    });
-                }
-                // Schildkröten
-                turtles.push(new Turtle(width * 0.2, height * 0.65, true));
-                turtles.push(new Turtle(width * 0.7, height * 0.7, false));
-                // Fliegenpilz
-                mushroomX = width * 0.85;
-                mushroomY = height * 0.65;
-                // Teetasse
-                teaCup = { x: width * 0.15, y: height * 0.75 };
-                p.windowResized = function() {
-                    if (document.getElementById('p5-container') && document.getElementById('mainScreen').style.display !== 'none') {
-                        const newWidth = document.getElementById('p5-container').offsetWidth;
-                        const newHeight = Math.max(500, newWidth * 0.6);
-                        p.resizeCanvas(newWidth, newHeight);
-                    }
-                };
-            };
-            p.draw = function() {
-                p.background('#8FBC8B');
-                p.noStroke();
-                p.fill(255, 220, 120, 100);
-                p.circle(p.width * 0.85, 80, 120);
-                p.fill(255, 255, 200);
-                p.noStroke();
-                stars.forEach(star => {
-                    p.fill(255, 255, 200, star.opacity);
-                    p.circle(star.x, star.y, star.size);
-                });
-                grasses.forEach(grass => {
-                    if (grassImg) {
-                        p.image(grassImg, grass.x - 20, p.height - grass.height - 20, 80, grass.height);
-                    }
-                });
-                flowers.forEach(flower => drawFlower(flower.x, flower.y, flower.petalColor));
-                dandelionPiles.forEach((pile, idx) => {
-                    drawDandelionPile(pile.x, pile.y, pile.eaten);
-                });
-                drawTeaCup(teaCup.x, teaCup.y);
-                if (mushroomImg) {
-                    p.image(mushroomImg, mushroomX - 25, mushroomY - 25, 50, 50);
-                }
-                turtles.forEach(turtle => {
-                    turtle.update();
-                    turtle.display();
-                });
-            };
-            function drawFlower(x, y, petalColor) {
-                p.push();
-                p.translate(x, y);
-                if (flowerImg) {
-                    p.image(flowerImg, -25, -30, 50, 60);
-                }
-                p.pop();
+    // ===== MUSIK-PLAYER =====
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let audioPlayer = new Audio();
+    const tracks = [
+        'musicplayer/0.mp3',
+        'musicplayer/1.mp3',
+        'musicplayer/2.mp3',
+        'musicplayer/3.mp3',
+        'musicplayer/4.mp3',
+        'musicplayer/5.mp3',
+        'musicplayer/6.mp3'
+    ];
+    
+    function togglePlay() {
+        if (isPlaying) {
+            audioPlayer.pause();
+            document.getElementById('playButton').textContent = '▶️ Abspielen';
+        } else {
+            if (audioPlayer.src === '') {
+                audioPlayer.src = tracks[currentTrackIndex];
             }
-            function drawDandelionPile(x, y, eaten) {
-                if (eaten) return;
-                p.push();
-                p.translate(x, y);
-                if (leavesImg) {
-                    p.image(leavesImg, -18, -12, 36, 24);
-                }
-                p.pop();
-            }
-            function drawTeaCup(x, y) {
-                p.push();
-                p.translate(x, y);
-                if (teaCupImg) {
-                    p.image(teaCupImg, -40, -40, 80, 80);
-                }
-                p.pop();
-            }
-            class Turtle {
-                constructor(startX, startY, direction) {
-                    this.p = p;
-                    this.x = startX;
-                    this.y = startY;
-                    this.direction = direction ? 1 : -1;
-                    this.speed = 0.8;
-                    this.targetY = startY;
-                    this.walkingAngle = 0;
-                    this.changeDirectionCounter = 0;
-                    this.eatingTimer = 0;
-                }
-                update() {
-                    this.changeDirectionCounter++;
-                    if (this.changeDirectionCounter > p.random(60, 150)) {
-                        this.direction *= -1;
-                        this.changeDirectionCounter = 0;
-                    }
-                    this.x += this.speed * this.direction;
-                    if (this.x < 20 || this.x > this.p.width - 20) {
-                        this.direction *= -1;
-                        this.x = p.constrain(this.x, 20, this.p.width - 20);
-                    }
-                    this.y = this.targetY + p.sin(p.frameCount * 0.02) * 3;
-                    this.walkingAngle += 0.15;
-                    this.checkAndEatDandelions();
-                }
-                checkAndEatDandelions() {
-                    let minDist = 80;
-                    let nearestIdx = -1;
-                    dandelionPiles.forEach((pile, idx) => {
-                        if (!pile.eaten) {
-                            let dist = p.dist(this.x, this.y, pile.x, pile.y);
-                            if (dist < minDist) {
-                                minDist = dist;
-                                nearestIdx = idx;
-                            }
-                        }
-                    });
-                    if (nearestIdx !== -1 && p.frameCount % 30 === 0) {
-                        dandelionPiles[nearestIdx].eaten = true;
-                        this.eatingTimer = 10;
-                    }
-                }
-                display() {
-                    p.push();
-                    p.translate(this.x, this.y);
-                    if (this.direction === -1) {
-                        p.scale(-1, 1);
-                    }
-                    if (turtleImg) {
-                        let bobbing = p.sin(this.walkingAngle) * 2;
-                        p.image(turtleImg, -25, -25 + bobbing, 50, 50);
-                    }
-                    p.pop();
-                }
-            }
-        };
-        function startSketch() {
-            if (window.p5Instance) {
-                window.p5Instance.remove();
-            }
-            window.p5Instance = new p5(sketch);
+            audioPlayer.play().catch(e => console.log('Fehler beim Abspielen:', e));
+            document.getElementById('playButton').textContent = '⏸️ Pausieren';
         }
+        isPlaying = !isPlaying;
+    }
+    
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        audioPlayer.src = tracks[currentTrackIndex];
+        if (isPlaying) {
+            audioPlayer.play();
+        }
+    }
+    
+    function previousTrack() {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        audioPlayer.src = tracks[currentTrackIndex];
+        if (isPlaying) {
+            audioPlayer.play();
+        }
+    }
+    
+    // ===== NATURGERÄUSCHE =====
+    let soundVolumes = {
+        birds: 0.5,
+        grille: 0.5,
+        rain: 0.5,
+        wind: 0.5
+    };
+    
+    let soundAudios = {
+        birds: new Audio(),
+        grille: new Audio(),
+        rain: new Audio(),
+        wind: new Audio()
+    };
+    
+    // WICHTIG: Fade-In Intervals speichern
+    let fadeInIntervals = {
+        birds: null,
+        grille: null,
+        rain: null,
+        wind: null
+    };
+    
+    function startAudio() {
+        soundAudios.birds.src = 'music/bird.mp3';
+        soundAudios.grille.src = 'music/grille.mp3';
+        soundAudios.rain.src = 'music/rain.mp3';
+        soundAudios.wind.src = 'music/wind.mp3';
+
+        // VOGELGESANG: Mit Pause
+        soundAudios.birds.loop = false;
+        soundAudios.birds.volume = 0.2;
+        soundAudios.birds.play();
+        
+        soundAudios.birds.onended = function() {
+            setTimeout(() => {
+                soundAudios.birds.currentTime = 0;
+                soundAudios.birds.play();
+            }, 13000);
+        };
+
+        // ANDERE: Nahtlose Loop mit Fade-In
+        ['grille', 'rain', 'wind'].forEach(sound => {
+            soundAudios[sound].loop = true;
+            soundAudios[sound].volume = 0;
+            soundAudios[sound].play();
+            
+            // Sanfter Fade-In (2 Sekunden)
+            let vol = 0;
+            fadeInIntervals[sound] = setInterval(() => {
+                if (vol < 0.5) {
+                    vol += 0.05;
+                    soundAudios[sound].volume = vol;
+                } else {
+                    clearInterval(fadeInIntervals[sound]);
+                    fadeInIntervals[sound] = null;
+                }
+            }, 100);
+        });
+    }
+    
+    function updateSoundVolume(soundName, value) {
+        value = value / 100;
+        soundVolumes[soundName] = value;
+        
+        // Fade-In Interval stoppen wenn Slider bewegt wird
+        if (fadeInIntervals[soundName]) {
+            clearInterval(fadeInIntervals[soundName]);
+            fadeInIntervals[soundName] = null;
+        }
+        
+        soundAudios[soundName].volume = value;
+        document.getElementById(soundName + 'Value').textContent = Math.round(value * 100) + '%';
+    }
+    
+    // ===== p5.js SKETCH =====
+    let sketch = (p) => {
+        let turtles = [];
+        let flowers = [];
+        let grasses = [];
+        let stars = [];
+        let dandelionPiles = [];
+        let teaCup = [];
+        let mushroomX, mushroomY;
+        
+        let turtleImg;
+        let flowerImg;
+        let grassImg;
+        let mushroomImg;
+        let leavesImg;
+        let teaCupImg;
+        
+        p.preload = function() {
+            turtleImg = p.loadImage('img/turtle.png');
+            flowerImg = p.loadImage('img/flower.png');
+            grassImg = p.loadImage('img/grass.png');
+            mushroomImg = p.loadImage('img/fliegenpilz.png');
+            leavesImg = p.loadImage('img/blaetter.png');
+            teaCupImg = p.loadImage('img/tee.png');
+        };
+        
+        p.setup = function() {
+            const container = document.getElementById('p5-container');
+            const width = container.offsetWidth;
+            const height = Math.max(500, width * 0.6);
+            let canvas = p.createCanvas(width, height);
+            canvas.parent('p5-container');
+            
+            for (let i = 0; i < 30; i++) {
+                stars.push({
+                    x: p.random(width),
+                    y: p.random(height * 0.3),
+                    size: p.random(1, 3),
+                    opacity: p.random(100, 200)
+                });
+            }
+            
+            for (let i = 0; i < 8; i++) {
+                flowers.push({
+                    x: p.random(50, width - 50),
+                    y: p.random(height * 0.5, height * 0.85),
+                    petalColor: p.color(p.random(200, 230), p.random(160, 200), p.random(140, 180), 200)
+                });
+            }
+            
+            for (let i = 0; i < 6; i++) {
+                grasses.push({
+                    x: p.random(width),
+                    y: p.random(height * 0.6, height),
+                    height: p.random(80, 100)
+                });
+            }
+            
+            for (let i = 0; i < 30; i++) {
+                dandelionPiles.push({
+                    x: p.random(50, width - 50),
+                    y: p.random(height * 0.5, height * 0.85),
+                    eaten: false
+                });
+            }
+            
+            turtles.push(new Turtle(width * 0.2, height * 0.65, true));
+            turtles.push(new Turtle(width * 0.7, height * 0.7, false));
+            
+            mushroomX = width * 0.85;
+            mushroomY = height * 0.65;
+            
+            teaCup = { x: width * 0.15, y: height * 0.75 };
+            
+            p.windowResized = function() {
+                if (document.getElementById('p5-container') && document.getElementById('mainScreen').style.display !== 'none') {
+                    const newWidth = document.getElementById('p5-container').offsetWidth;
+                    const newHeight = Math.max(500, newWidth * 0.6);
+                    p.resizeCanvas(newWidth, newHeight);
+                }
+            };
+        };
+        
+        p.draw = function() {
+            p.background('#8FBC8B');
+            p.noStroke();
+            p.fill(255, 220, 120, 100);
+            p.circle(p.width * 0.85, 80, 120);
+            p.fill(255, 255, 200);
+            p.noStroke();
+            stars.forEach(star => {
+                p.fill(255, 255, 200, star.opacity);
+                p.circle(star.x, star.y, star.size);
+            });
+            grasses.forEach(grass => {
+                if (grassImg) {
+                    p.image(grassImg, grass.x - 20, p.height - grass.height - 20, 80, grass.height);
+                }
+            });
+            flowers.forEach(flower => drawFlower(flower.x, flower.y, flower.petalColor));
+            dandelionPiles.forEach((pile, idx) => {
+                drawDandelionPile(pile.x, pile.y, pile.eaten);
+            });
+            drawTeaCup(teaCup.x, teaCup.y);
+            if (mushroomImg) {
+                p.image(mushroomImg, mushroomX - 25, mushroomY - 25, 50, 50);
+            }
+            turtles.forEach(turtle => {
+                turtle.update();
+                turtle.display();
+            });
+        };
+        
+        function drawFlower(x, y, petalColor) {
+            p.push();
+            p.translate(x, y);
+            if (flowerImg) {
+                p.image(flowerImg, -25, -30, 50, 60);
+            }
+            p.pop();
+        }
+        
+        function drawDandelionPile(x, y, eaten) {
+            if (eaten) return;
+            p.push();
+            p.translate(x, y);
+            if (leavesImg) {
+                p.image(leavesImg, -18, -12, 36, 24);
+            }
+            p.pop();
+        }
+        
+        function drawTeaCup(x, y) {
+            p.push();
+            p.translate(x, y);
+            if (teaCupImg) {
+                p.image(teaCupImg, -40, -40, 80, 80);
+            }
+            p.pop();
+        }
+        
+        class Turtle {
+            constructor(startX, startY, direction) {
+                this.p = p;
+                this.x = startX;
+                this.y = startY;
+                this.direction = direction ? 1 : -1;
+                this.speed = 0.8;
+                this.targetY = startY;
+                this.walkingAngle = 0;
+                this.changeDirectionCounter = 0;
+                this.eatingTimer = 0;
+            }
+            
+            update() {
+                this.changeDirectionCounter++;
+                if (this.changeDirectionCounter > p.random(60, 150)) {
+                    this.direction *= -1;
+                    this.changeDirectionCounter = 0;
+                }
+                this.x += this.speed * this.direction;
+                if (this.x < 20 || this.x > this.p.width - 20) {
+                    this.direction *= -1;
+                    this.x = p.constrain(this.x, 20, this.p.width - 20);
+                }
+                this.y = this.targetY + p.sin(p.frameCount * 0.02) * 3;
+                this.walkingAngle += 0.15;
+                this.checkAndEatDandelions();
+            }
+            
+            checkAndEatDandelions() {
+                let minDist = 80;
+                let nearestIdx = -1;
+                dandelionPiles.forEach((pile, idx) => {
+                    if (!pile.eaten) {
+                        let dist = p.dist(this.x, this.y, pile.x, pile.y);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            nearestIdx = idx;
+                        }
+                    }
+                });
+                if (nearestIdx !== -1 && p.frameCount % 30 === 0) {
+                    dandelionPiles[nearestIdx].eaten = true;
+                    this.eatingTimer = 10;
+                }
+            }
+            
+            display() {
+                p.push();
+                p.translate(this.x, this.y);
+                if (this.direction === -1) {
+                    p.scale(-1, 1);
+                }
+                if (turtleImg) {
+                    let bobbing = p.sin(this.walkingAngle) * 2;
+                    p.image(turtleImg, -25, -25 + bobbing, 50, 50);
+                }
+                p.pop();
+            }
+        }
+    };
+    
+    function startSketch() {
+        if (window.p5Instance) {
+            window.p5Instance.remove();
+        }
+        window.p5Instance = new p5(sketch);
+    }
     </script>
 </body>
 </html>
