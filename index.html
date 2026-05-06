@@ -359,6 +359,12 @@
             rain: new Audio(),
             wind: new Audio()
         };
+
+        let fadeInIntervals = {
+            grille: null,
+            rain: null,
+            wind: null
+        };
         function startAudio() {
     soundAudios.birds.src = 'music/bird.mp3';
     soundAudios.grille.src = 'music/grille.mp3';
@@ -385,12 +391,13 @@
         
         // Sanfter Fade-In (2 Sekunden)
         let vol = 0;
-        let fadeInInterval = setInterval(() => {
+        fadeInIntervals[sound] = setInterval(() => {
             if (vol < 0.5) {
                 vol += 0.05;
                 soundAudios[sound].volume = vol;
             } else {
                 clearInterval(fadeInInterval);
+                fadeInIntervals[sound] = null;
             }
         }, 100);
     });
@@ -398,15 +405,15 @@
         function updateSoundVolume(soundName, value) {
     value = value / 100;
     soundVolumes[soundName] = value;
+    
+    // Fade-In Interval STOPPEN wenn Slider bewegt wird
+    if (fadeInIntervals[soundName]) {
+        clearInterval(fadeInIntervals[soundName]);
+        fadeInIntervals[soundName] = null;
+    }
+    
     soundAudios[soundName].volume = value;
     document.getElementById(soundName + 'Value').textContent = Math.round(value * 100) + '%';
-    
-    // Erzwinge Update auf Mobile
-    if (!soundAudios[soundName].paused) {
-        soundAudios[soundName].pause();
-        soundAudios[soundName].currentTime = 0;
-        soundAudios[soundName].play();
-    }
 }
         // ===== p5.js SKETCH =====
         let sketch = (p) => {
