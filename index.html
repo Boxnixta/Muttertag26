@@ -236,10 +236,6 @@
                 <div class="sound-controls">
                     <div class="player-title">🔊 Naturgeräusche</div>
                     <div class="sound-item">
-                        <span class="sound-label">🐦 Vogelgesang</span>
-                        <button class="sound-button" id="birdBtn" onclick="toggleSound('birds')">▶️ An</button>
-                    </div>
-                    <div class="sound-item">
                         <span class="sound-label">🦗 Grillenzirpen</span>
                         <button class="sound-button" id="grilleBtn" onclick="toggleSound('grille')">▶️ An</button>
                     </div>
@@ -311,30 +307,22 @@
         
         // ===== NATURGERÄUSCHE =====
         let soundStates = {
-            birds: true,
             grille: true,
             rain: true,
             wind: true
         };
         
         let soundAudios = {
-            birds: new Audio(),
             grille: new Audio(),
             rain: new Audio(),
             wind: new Audio()
         };
         
         function startAudio() {
-            soundAudios.birds.src = 'music/bird.mp3';
             soundAudios.grille.src = 'music/grille.mp3';
             soundAudios.rain.src = 'music/rain.mp3';
             soundAudios.wind.src = 'music/wind.mp3';
 
-            // ALLE GERÄUSCHE: Loop + verschiedene Lautstärken
-            soundAudios.birds.loop = true;
-            soundAudios.birds.volume = 0.08;
-            soundAudios.birds.play();
-            
             soundAudios.grille.loop = true;
             soundAudios.grille.volume = 0.7;
             soundAudios.grille.play();
