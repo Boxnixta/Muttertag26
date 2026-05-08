@@ -324,30 +324,17 @@
             wind: new Audio()
         };
         
-        let birdTimeout = null;
-        
-        function startBirdSound() {
-            soundAudios.birds.currentTime = 0;
-            soundAudios.birds.play();
-            
-            birdTimeout = setTimeout(() => {
-                if (soundStates['birds']) {
-                    startBirdSound();
-                }
-            }, 13000);
-        }
-        
         function startAudio() {
             soundAudios.birds.src = 'music/bird.mp3';
             soundAudios.grille.src = 'music/grille.mp3';
             soundAudios.rain.src = 'music/rain.mp3';
             soundAudios.wind.src = 'music/wind.mp3';
 
-            // VOGELGESANG: SEHR LEISE mit Timer
+            // ALLE GERÄUSCHE: Loop + verschiedene Lautstärken
+            soundAudios.birds.loop = true;
             soundAudios.birds.volume = 0.08;
-            startBirdSound();
-
-            // ANDERE: LAUTER
+            soundAudios.birds.play();
+            
             soundAudios.grille.loop = true;
             soundAudios.grille.volume = 0.7;
             soundAudios.grille.play();
@@ -368,17 +355,10 @@
                 soundAudios[soundName].pause();
                 btn.textContent = '⏸️ Aus';
                 soundStates[soundName] = false;
-                if (soundName === 'birds' && birdTimeout) {
-                    clearTimeout(birdTimeout);
-                }
             } else {
+                soundAudios[soundName].play();
                 btn.textContent = '▶️ An';
                 soundStates[soundName] = true;
-                if (soundName === 'birds') {
-                    startBirdSound();
-                } else {
-                    soundAudios[soundName].play();
-                }
             }
         }
         
