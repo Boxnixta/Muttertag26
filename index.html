@@ -416,13 +416,18 @@
         value = value / 100;
         soundVolumes[soundName] = value;
         
+        console.log(`Slider bewegt: ${soundName} = ${value}`); // DEBUG
+        
         // Fade-In Interval stoppen wenn Slider bewegt wird
         if (fadeInIntervals[soundName]) {
             clearInterval(fadeInIntervals[soundName]);
             fadeInIntervals[soundName] = null;
+            console.log(`Interval gestoppt für ${soundName}`); // DEBUG
         }
         
         soundAudios[soundName].volume = value;
+        console.log(`Volume gesetzt auf ${value} für ${soundName}`); // DEBUG
+        
         document.getElementById(soundName + 'Value').textContent = Math.round(value * 100) + '%';
     }
     
