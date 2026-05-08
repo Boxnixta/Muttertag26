@@ -324,23 +324,28 @@
             wind: new Audio()
         };
         
+        let birdTimeout = null;
+        
+        function startBirdSound() {
+            soundAudios.birds.currentTime = 0;
+            soundAudios.birds.play();
+            
+            birdTimeout = setTimeout(() => {
+                if (soundStates['birds']) {
+                    startBirdSound();
+                }
+            }, 13000);
+        }
+        
         function startAudio() {
             soundAudios.birds.src = 'music/bird.mp3';
             soundAudios.grille.src = 'music/grille.mp3';
             soundAudios.rain.src = 'music/rain.mp3';
             soundAudios.wind.src = 'music/wind.mp3';
 
-            // VOGELGESANG: SEHR LEISE
-            soundAudios.birds.loop = false;
+            // VOGELGESANG: SEHR LEISE mit Timer
             soundAudios.birds.volume = 0.08;
-            soundAudios.birds.play();
-            
-            soundAudios.birds.onended = function() {
-                setTimeout(() => {
-                    soundAudios.birds.currentTime = 0;
-                    soundAudios.birds.play();
-                }, 13000);
-            };
+            startBirdSound();
 
             // ANDERE: LAUTER
             soundAudios.grille.loop = true;
@@ -363,14 +368,17 @@
                 soundAudios[soundName].pause();
                 btn.textContent = '⏸️ Aus';
                 soundStates[soundName] = false;
-            } else {
-                // Für Vögel: Zurückspulen vor Wiedergabe
-                if (soundName === 'birds') {
-                    soundAudios[soundName].currentTime = 0;
+                if (soundName === 'birds' && birdTimeout) {
+                    clearTimeout(birdTimeout);
                 }
-                soundAudios[soundName].play();
+            } else {
                 btn.textContent = '▶️ An';
                 soundStates[soundName] = true;
+                if (soundName === 'birds') {
+                    startBirdSound();
+                } else {
+                    soundAudios[soundName].play();
+                }
             }
         }
         
