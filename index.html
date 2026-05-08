@@ -364,6 +364,10 @@
                 btn.textContent = '⏸️ Aus';
                 soundStates[soundName] = false;
             } else {
+                // Für Vögel: Zurückspulen vor Wiedergabe
+                if (soundName === 'birds') {
+                    soundAudios[soundName].currentTime = 0;
+                }
                 soundAudios[soundName].play();
                 btn.textContent = '▶️ An';
                 soundStates[soundName] = true;
